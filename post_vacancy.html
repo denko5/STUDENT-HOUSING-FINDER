@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Vacancy</title>
+    <link rel="stylesheet" href="vacancy.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&callback=initMap&libraries=places" async defer></script>
+</head>
+<body>
+    
+    <div class="container">
+        <h1>Post a New Vacancy</h1>
+        <form action="post_vacancy.php" method="POST" enctype="multipart/form-data" id="vacancy-form">
+
+            <label for="type">Type:</label>
+            <input type="text" id="type" name="type" placeholder="Room type, Bedsitter..." required>
+
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" placeholder="Area name..." required>
+
+            <label for="price">Price (KES):</label>
+            <input type="number" id="price" name="price" placeholder="Rent Price..." required>
+
+            <label for="distance_km">Distance to campus (KM):</label>
+            <input type="number" id="distance_km" name="distance_km" placeholder="Estimated distance in Km..." required>
+
+            <label for="landlord_contact">Landlord Contact:</label>
+            <input type="text" id="landlord_contact" name="landlord_contact" placeholder="Phone Number or Email..." required>
+
+            <label for="image_path">Upload Image:</label>
+            <div class="file-upload">
+                <input type="file" id="image_path" name="image_path" accept=".png, .jpg, .gif" multiple>
+                <p>Drag and drop files here, or click to upload (PNG, JPG, GIF up to 10MB)</p>
+            </div>
+
+            <label for="location_pin">Set Location (Pin the location on the map):</label>
+            <button type="button" onclick="openMap()">Pick Location</button> <br><br>
+
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+
+            <div id="map"></div>
+
+            <button type="submit" name="submit">Post Vacancy</button>
+
+        </form>
+    </div>
+
+    <script>
+        let map, marker, geocoder;
+
+        // Initialize the map
+        function initMap() {
+            const initialPosition = { lat: -1.2921, lng: 36.8219 }; // Default position (Nairobi)
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: initialPosition,
+            });
+
+            marker = new google.maps.Marker({
+                position: initialPosition,
+                map: map,
+                draggable: true, // Make the marker draggable
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            // Add a click event listener to update the marker and input fields when clicked on the map
+            google.maps.event.addListener(map, "click", function (event) {
+                const latLng = event.latLng;
+                marker.setPosition(latLng);
+                document.getElementById("latitude").value = latLng.lat();
+                document.getElementById("longitide").value = latLng.lng();
+
+                // Use reverse geocoding to get the location name (address or area)
+                geocoder.geocode({location: latLng }, function(results, status) {
+                    if (status === "OK" && results[0]) {
+                        const locationName = results[0].formatted_address; // The Formatted address of the location
+                        document.getElementById("location").value = locationName; // Display it in location input field
+                    } else {
+                        alert("Geocoder failed due to: " + status);
+                    }
+                });
+
+            });
+        }
+
+        // Open the Google Map
+        function openMap() {
+            initMap();
+        }
+
+    </script>
+
+</body>
+</html>
